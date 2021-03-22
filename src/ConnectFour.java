@@ -15,32 +15,31 @@ public class ConnectFour {
         frame.add(new MultiDraw(frame.getSize()));
         frame.pack();
         frame.setVisible(true);
-        this.setLocationRelativeTo(null);
+        frame.setLocationRelativeTo(null);
         frame.setResizable(false);
     }
 
-    private void setLocationRelativeTo(Object o) {
-    }
 
-    public static void main(String... argv) {
+    public static void main(String[] args) {
         new ConnectFour();
     }
 
     public static class MultiDraw extends JPanel  implements MouseListener {
-        int startX = 10;
-        int startY = 10;
-        int cellSize = 190;
-        int turn = 2;
-        int rows = 6;
-        int cols = 7;
+
+        int numberofRows = 6;
+        int numberofColumns = 7;
+        int yStartPosition = 10;
+        int posStartPosition = 10;
         int redCounter;
         int yellowCounter;
         int moves;
         boolean winner=false;
-        String ccolor = "";
+        String playerColour = "";
+        int gridCell = 190;
+        int turn = 2;
 
 
-        Color[][] grid = new Color[rows][cols];
+        Color[][] grid = new Color[numberofRows][numberofColumns];
         public MultiDraw(Dimension dimension) {
             setSize(dimension);
             setPreferredSize(dimension);
@@ -49,7 +48,7 @@ public class ConnectFour {
             int x = 0;
             for (int row = 0; row < grid.length; row++) {
                 for (int col = 0; col < grid[0].length; col++) {
-                    Color c;
+//                    Color c;
                     if(x%2==0){
                         grid[row][col] = Color.white;
                     }else{
@@ -58,111 +57,40 @@ public class ConnectFour {
                     x++;
 
                 }
-
             }
-        }
-
-        @Override
-        public void paintComponent(Graphics g) {
-            Graphics2D g2 = (Graphics2D)g;
-            Dimension d = getSize();
-            g2.setColor(new Color(0, 0, 0));
-            g2.fillRect(0,0,d.width,d.height);
-            startX = 0;
-            startY = 0;
-
-            //2) draw grid here
-            for (int row = 0; row < grid.length; row++) {
-                for (int col = 0; col < grid[0].length; col++) {
-
-                    g2.setColor(grid[row][col]);
-                    g2.fillRect(startX,startY,cellSize,cellSize);
-                    g2.setColor(Color.black);
-                    g2.drawRect(startX,startY,cellSize,cellSize);
-                    startX += cellSize;
-                }
-                startY += cellSize;
-                startX = 0;
-            }
-            Font stringFont = new Font( "SansSerif", Font.PLAIN, 32 );
-            Font winnerFont = new Font( "SansSerif", Font.PLAIN, 60 );
-            g2.setColor(new Color(190, 54, 54));
-
-            g2.setColor(new Color(190, 54, 54));
-            g2.setFont(stringFont);
-            g2.drawString("Red Wins: " + redCounter, 1350, 40);
-
-            g2.setColor(new Color(188, 175, 55));
-            g2.setFont(stringFont);
-            g2.drawString("Yellow Wins: " + yellowCounter, 1350, 80);
-//            g2.setFont(stringFont);
-//            JButton play = new JButton("Play Again");
-//            JPanel panel = new JPanel();
-//            panel.add(play);
-//            panel.setVisible(true);
-
-//           g2.drawRect(1450,1100, 200,100);
-
-            g2.fillRect(1450,1150, 200,100);
-            g2.setColor(new Color(0, 0, 0));
-            g2.drawString("Play Again", 1470, 1210);
-
-
-
-            if(winner==false){
-                if(turn%2==0) {
-                    g2.setColor(new Color(190, 54, 54));
-                    g2.setFont(stringFont);
-                    g2.drawString("Red's Turn", 700, 1200);
-                }
-                else {
-                    g2.setColor(new Color(188, 175, 55));
-                    g2.setFont(stringFont);
-                    g2.drawString("Yellow's Turn", 700, 1200);
-                }
-            }else{
-
-                g2.setFont(winnerFont);
-                g2.setColor(new Color(91, 146, 53));
-                g2.drawString("WINNER - "+ ccolor,700,1200);
-
-            }
-
         }
 
         public void mousePressed(MouseEvent e) {
-            int x = e.getX();
-            int y = e.getY();
+            int posX = e.getX();
+            int posY = e.getY();
             if(winner==false){
-                if(x<(cellSize*grid[0].length) && y<(cellSize*grid.length)){
-                    int clickedRow = y/cellSize;
-                    int clickedCol = x/cellSize;
+                if(posX<(gridCell*grid[0].length) && posY<(gridCell*grid.length)){
+                    int clickedRow = posY/gridCell;
+                    int clickedCol = posX/gridCell;
 
-                    clickedRow = dropP(clickedCol);
+                    clickedRow = counterDrop(clickedCol);
 
                     if(clickedRow!=-1){
 
                         if(turn%2==0){
                             grid[clickedRow][clickedCol]= Color.red;
-                            ccolor =  "RED";
+                            playerColour =  "RED";
                         } else{
                             grid[clickedRow][clickedCol]= Color.yellow;
-                            ccolor =  "Yellow";
+                            playerColour =  "Yellow";
                         }
                         turn++;
                         if(checkForWinner(clickedCol,clickedRow, grid[clickedRow][clickedCol])){
                             winner=true;
-                            if(ccolor.equals("RED") ) {
-
+                            if(playerColour.equals("RED") ) {
                                 redCounter++;
                             }
-                            else if(ccolor.equals("Yellow")) {
+                            else if(playerColour.equals("Yellow")) {
                                 yellowCounter++;
                             }
                             else {
 
                             }
-
                         }
                     }
                 }
@@ -174,18 +102,78 @@ public class ConnectFour {
             }
         }
 
-        public int dropP(int cc){
-            int cr = grid.length-1;
+        public int counterDrop(int c){
+            int drop = grid.length-1;
 
-            while(cr>=0){
+            while(drop>=0){
 
-                if(grid[cr][cc].equals(Color.white)){
-                    return cr;
+                if(grid[drop][c].equals(Color.white)){
+                    return drop;
                 }
-                cr--;
+                drop--;
             }
 
             return -1;
+
+        }
+
+        public void paint(Graphics g) {
+            Graphics2D g2 = (Graphics2D)g;
+            Dimension d = getSize();
+            g2.setColor(new Color(0, 0, 0));
+            g2.fillRect(0,0,d.width,d.height);
+            posStartPosition = 0;
+            yStartPosition = 0;
+
+            //2) draw grid here
+            for (int row = 0; row < grid.length; row++) {
+                for (int col = 0; col < grid[0].length; col++) {
+
+                    g2.setColor(grid[row][col]);
+                    g2.fillRect(posStartPosition,yStartPosition,gridCell,gridCell);
+                    g2.setColor(Color.black);
+                    g2.drawRect(posStartPosition,yStartPosition,gridCell,gridCell);
+                    posStartPosition += gridCell;
+                }
+                yStartPosition += gridCell;
+                posStartPosition = 0;
+            }
+            Font textFont = new Font( null, 0, 32 );
+            Font winnerFont = new Font( null, 0, 60 );
+            g2.setColor(new Color(255, 0, 0));
+
+            g2.setColor(new Color(255, 0, 0));
+            g2.setFont(textFont);
+            g2.drawString("Red Wins: " + redCounter, 1350, 40);
+
+            g2.setColor(new Color(203, 187, 16));
+            g2.setFont(textFont);
+            g2.drawString("Yellow Wins: " + yellowCounter, 1350, 80);
+//
+            g2.fillRect(1450,1150, 200,100);
+            g2.setColor(new Color(0, 0, 0));
+            g2.drawString("Play Again", 1470, 1210);
+
+
+
+            if(!winner){
+                if(turn%2==0) {
+                    g2.setColor(new Color(255, 0, 0));
+                    g2.setFont(textFont);
+                    g2.drawString("Red's Turn", 700, 1200);
+                }
+                else {
+                    g2.setColor(new Color(203, 187, 16));
+                    g2.setFont(textFont);
+                    g2.drawString("Yellow's Turn", 700, 1200);
+                }
+            }else{
+
+                g2.setFont(winnerFont);
+                g2.setColor(new Color(0, 153, 153));
+                g2.drawString("WINNER - "+ playerColour,700,1200);
+
+            }
 
         }
 
@@ -205,16 +193,16 @@ public class ConnectFour {
 
         }
 
-        //Marvel
+     
 
         public boolean  checkForWinner(int cc,int cr, Color c){
             //search west and east
-            int xStart = cc;
+            int posStart = cc;
             int count = 1;
             //check west
-            xStart--;
-            while(xStart>=0){
-                if(grid[cr][xStart].equals(c)){
+            posStart--;
+            while(posStart>=0){
+                if(grid[cr][posStart].equals(c)){
                     count++;
                 }else{
                     break;
@@ -222,15 +210,15 @@ public class ConnectFour {
                 if(count==4)
                     return true;
 
-                xStart--;
+                posStart--;
             }
 
             //check east
-            xStart = cc;
-            xStart++;
-            while(xStart<grid[0].length){
+            posStart = cc;
+            posStart++;
+            while(posStart<grid[0].length){
 
-                if(grid[cr][xStart].equals(c)){
+                if(grid[cr][posStart].equals(c)){
 
                     count++;
                 }else{
@@ -239,12 +227,9 @@ public class ConnectFour {
                 if(count==4)
                     return true;
 
-                xStart++;
+                posStart++;
             }
-
-            /*
-             * More searches here
-             */
+            
 
             //check North
             count = 1;
@@ -285,11 +270,11 @@ public class ConnectFour {
             //check NorthWest
             count = 1;
             yStart = cr;
-            xStart = cc;
-            xStart--;
+            posStart = cc;
+            posStart--;
             yStart--;
-            while(yStart>0 && xStart>0){
-                if(grid[yStart][xStart].equals(c)){
+            while(yStart>0 && posStart>0){
+                if(grid[yStart][posStart].equals(c)){
                     count++;
                 }else{
                     break;
@@ -298,17 +283,17 @@ public class ConnectFour {
                     return true;
 
                 yStart--;
-                xStart--;
+                posStart--;
             }
 
             //check Southeast
             yStart = cr;
             yStart++;
-            xStart = cc;
-            xStart++;
-            while(yStart<grid.length && xStart<grid.length){
+            posStart = cc;
+            posStart++;
+            while(yStart<grid.length && posStart<grid.length){
 
-                if(grid[yStart][xStart].equals(c)){
+                if(grid[yStart][posStart].equals(c)){
 
                     count++;
                 }else{
@@ -318,7 +303,7 @@ public class ConnectFour {
                     return true;
 
                 yStart++;
-                xStart++;
+                posStart++;
             }
 
             /*
@@ -328,11 +313,11 @@ public class ConnectFour {
             //check southWest
             count = 1;
             yStart = cr;
-            xStart = cc;
-            xStart--;
+            posStart = cc;
+            posStart--;
             yStart++;
-            while(yStart<grid.length && xStart>0){
-                if(grid[yStart][xStart].equals(c)){
+            while(yStart<grid.length && posStart>0){
+                if(grid[yStart][posStart].equals(c)){
                     count++;
                 }else{
                     break;
@@ -341,17 +326,17 @@ public class ConnectFour {
                     return true;
 
                 yStart++;
-                xStart--;
+                posStart--;
             }
 
             //check Northeast
             yStart = cr;
             yStart--;
-            xStart = cc;
-            xStart++;
-            while(yStart>0 && xStart<grid.length){
+            posStart = cc;
+            posStart++;
+            while(yStart>0 && posStart<grid.length){
 
-                if(grid[yStart][xStart].equals(c)){
+                if(grid[yStart][posStart].equals(c)){
 
                     count++;
                 }else{
@@ -361,7 +346,7 @@ public class ConnectFour {
                     return true;
 
                 yStart--;
-                xStart++;
+                posStart++;
             }
 
             return false;
