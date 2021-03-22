@@ -34,6 +34,8 @@ public class ConnectFour {
         int posStartPosition;
         int redCounter; // stores wins for player Red
         int yellowCounter; // stores wins for player Yellow
+        int redMoves; // counts amount of moves by red player
+        int yellowMoves; // counts amount of moves by yellow player
         int moves;
         boolean winner=false;
         String playerColour = "";
@@ -82,9 +84,11 @@ public class ConnectFour {
                         if(playerTurn%2==0){
                             grid[clickedRow][clickedCol]= Color.red;
                             playerColour =  "RED";
+                            redMoves++;
                         } else{
                             grid[clickedRow][clickedCol]= Color.yellow;
                             playerColour =  "Yellow";
+                            yellowMoves++;
                         }
                         playerTurn++; // increments player counter
 
@@ -133,10 +137,10 @@ public class ConnectFour {
 
         // Main section for graphics
         public void paint(Graphics g) {
-            Graphics2D g2 = (Graphics2D)g;
+            Graphics2D g2d = (Graphics2D)g;
             Dimension d = getSize();
-            g2.setColor(new Color(0, 0, 0)); // sets background colour
-            g2.fillRect(0,0,d.width,d.height);
+            g2d.setColor(new Color(0, 0, 0)); // sets background colour
+            g2d.fillRect(0,0,d.width,d.height);
             posStartPosition = 0; // Leave at 0
             yStartPosition = 0;  // leave at 0
 
@@ -144,10 +148,10 @@ public class ConnectFour {
             for (int row = 0; row < grid.length; row++) {
                 for (int col = 0; col < grid[0].length; col++) {
 
-                    g2.setColor(grid[row][col]); // no colour set - leave white
-                    g2.fillRect(posStartPosition,yStartPosition,gridCell,gridCell);
-                    g2.setColor(Color.black); // Grid outline colour
-                    g2.drawRect(posStartPosition,yStartPosition,gridCell,gridCell);
+                    g2d.setColor(grid[row][col]); // no colour set - leave white
+                    g2d.fillRect(posStartPosition,yStartPosition,gridCell,gridCell);
+                    g2d.setColor(Color.black); // Grid outline colour
+                    g2d.drawRect(posStartPosition,yStartPosition,gridCell,gridCell);
                     posStartPosition += gridCell;
                 }
                 yStartPosition += gridCell;
@@ -157,44 +161,59 @@ public class ConnectFour {
             // Sets colour and Font for text used
             Font textFont = new Font( null, 0, 32 );
             Font winnerFont = new Font( null, 0, 60 );
-            g2.setColor(new Color(255, 0, 0));
+            g2d.setColor(new Color(255, 0, 0));
 
-            g2.setColor(new Color(255, 0, 0));
-            g2.setFont(textFont);
-            g2.drawString("Red Wins: " + redCounter, 1350, 40);
+            g2d.setColor(new Color(255, 0, 0));
+            g2d.setFont(textFont);
+            g2d.drawString("Red Wins: " + redCounter, 1350, 240);
 
-            g2.setColor(new Color(203, 187, 16));
-            g2.setFont(textFont);
-            g2.drawString("Yellow Wins: " + yellowCounter, 1350, 80);
+            g2d.setColor(new Color(203, 187, 16));
+            g2d.setFont(textFont);
+            g2d.drawString("Yellow Wins: " + yellowCounter, 1350, 280);
+
+            g2d.setColor(new Color(255, 0, 0));
+            g2d.setFont(textFont);
+            g2d.drawString("Red Moves: " + redMoves, 1350, 640);
+
+            g2d.setColor(new Color(203, 187, 16));
+            g2d.setFont(textFont);
+            g2d.drawString("Yellow Moves: " + yellowMoves, 1350, 680);
 
 
 // font used in reset button and rectangle
 
-            g2.fillRect(1450,1150, 200,100);
-            g2.setColor(new Color(0, 0, 0));
-            g2.drawString("Reset", 1470, 1210);
+            g2d.fillRect(1450,1150, 200,100);
+            g2d.setColor(new Color(0, 0, 0));
+            g2d.drawString("Reset", 1470, 1210);
 
 
 
 
 //  if no winner yet,announces whose turn it is. Colours change to correspond to player colour
             if(winner){
-
-                g2.setFont(winnerFont);
-                g2.setColor(new Color(0, 153, 153));
-                g2.drawString("WINNER - "+ playerColour,700,1200);
+                g2d.setFont(winnerFont);
+                g2d.setColor(new Color(0, 153, 153));
+                g2d.drawString("WINNER - "+ playerColour,700,1200);
 
             }
 
         }
 
+        // checks if mouse is within the area of rectangle and then disposes of old window and calls a new one to act like a reset
+        public void mouseClicked(MouseEvent e) {
+            Ellipse2D rect = new Ellipse2D.Double(1450, 1150, 200, 100);
+            if ((e.getButton() == 1) && rect.contains(e.getX(), e.getY())) {
+                setVisible(false);
+                new ConnectFour();
+            }
+        }
 
- // no mouse events set
-        public void mouseReleased(MouseEvent e) {
+
+        public void mouseEntered(MouseEvent e) {
 
         }
 
-        public void mouseEntered(MouseEvent e) {
+        public void mouseReleased(MouseEvent e) {
 
         }
 
@@ -202,45 +221,33 @@ public class ConnectFour {
 
         }
 
-        public void mouseClicked(MouseEvent e) {
-            Ellipse2D rect = new Ellipse2D.Double(1450, 1150, 200, 100);
 
-
-                if ((e.getButton() == 1) && rect.contains(e.getX(), e.getY())) {
-setVisible(false);
-                    new ConnectFour();
-
-                }
-        }
 
 
 // Checks left and right, up and down and diagonally for 4 in a row
-        public boolean  checkForWinner(int cc,int cr, Color c){
-
-
+        public boolean  checkForWinner(int i,int x, Color col){
             // Right
-            int posStart = cc;
+            int posStart = i;
             int count = 1;
 
             posStart--;
             while(posStart>=0){
-                if(grid[cr][posStart].equals(c)){
+                if(grid[x][posStart].equals(col)){
                     count++;
                 }else{
                     break;
                 }
                 if(count==4)
                     return true;
-
                 posStart--;
             }
 
             // Left
-            posStart = cc;
+            posStart = i;
             posStart++;
             while(posStart<grid[0].length){
 
-                if(grid[cr][posStart].equals(c)){
+                if(grid[x][posStart].equals(col)){
 
                     count++;
                 }else{
@@ -255,10 +262,10 @@ setVisible(false);
 
             // Down
             count = 1;
-            int yStart = cr;
+            int yStart = x;
             yStart--;
             while(yStart>0){
-                if(grid[yStart][cc].equals(c)){
+                if(grid[yStart][i].equals(col)){
                     count++;
                 }else{
                     break;
@@ -270,11 +277,11 @@ setVisible(false);
             }
 
             // Up
-            yStart = cr;
+            yStart = x;
             yStart++;
             while(yStart<grid.length){
 
-                if(grid[yStart][cc].equals(c)){
+                if(grid[yStart][i].equals(col)){
 
                     count++;
                 }else{
@@ -288,12 +295,12 @@ setVisible(false);
 
              // Up Left
             count = 1;
-            yStart = cr;
-            posStart = cc;
+            yStart = x;
+            posStart = i;
             posStart--;
             yStart--;
             while(yStart>0 && posStart>0){
-                if(grid[yStart][posStart].equals(c)){
+                if(grid[yStart][posStart].equals(col)){
                     count++;
                 }else{
                     break;
@@ -306,13 +313,13 @@ setVisible(false);
             }
 
             // Down Right
-            yStart = cr;
+            yStart = x;
             yStart++;
-            posStart = cc;
+            posStart = i;
             posStart++;
             while(yStart<grid.length && posStart<grid.length){
 
-                if(grid[yStart][posStart].equals(c)){
+                if(grid[yStart][posStart].equals(col)){
 
                     count++;
                 }else{
@@ -327,12 +334,12 @@ setVisible(false);
 
             // down Left
             count = 1;
-            yStart = cr;
-            posStart = cc;
+            yStart = x;
+            posStart = i;
             posStart--;
             yStart++;
             while(yStart<grid.length && posStart>0){
-                if(grid[yStart][posStart].equals(c)){
+                if(grid[yStart][posStart].equals(col)){
                     count++;
                 }else{
                     break;
@@ -345,13 +352,13 @@ setVisible(false);
             }
 
             // Up Right
-            yStart = cr;
+            yStart = x;
             yStart--;
-            posStart = cc;
+            posStart = i;
             posStart++;
             while(yStart>0 && posStart<grid.length){
 
-                if(grid[yStart][posStart].equals(c)){
+                if(grid[yStart][posStart].equals(col)){
 
                     count++;
                 }else{
